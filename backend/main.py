@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from agent import perplexity_agent
+from specialized_agents import sports_agent, finance_agent
 from models import ChatRequest, ChatResponse, HealthResponse
 
 load_dotenv()
@@ -85,6 +86,88 @@ async def chat(request: ChatRequest):
             detail=f"Error processing chat request: {str(e)}"
         )
 
+@app.post("/chat/sports", response_model=ChatResponse)
+async def chat_sports(request: ChatRequest):
+    """
+    Sports specialist chat endpoint that processes sports-related queries
+    """
+    try:
+        result = await sports_agent.chat(
+            message=request.message,
+            thread_id=request.thread_id
+        )
+        
+        return ChatResponse(
+            response=result["response"],
+            thread_id=result["thread_id"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing sports chat request: {str(e)}"
+        )
+
+@app.get("/chat/sports/summary", response_model=ChatResponse)
+async def sports_initial_summary():
+    """
+    Get initial sports summary for the sports landing page
+    """
+    try:
+        result = await sports_agent.get_initial_summary()
+        
+        return ChatResponse(
+            response=result["response"],
+            thread_id=result["thread_id"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating sports summary: {str(e)}"
+        )
+
+@app.post("/chat/finance", response_model=ChatResponse)
+async def chat_finance(request: ChatRequest):
+    """
+    Finance specialist chat endpoint that processes finance-related queries
+    """
+    try:
+        result = await finance_agent.chat(
+            message=request.message,
+            thread_id=request.thread_id
+        )
+        
+        return ChatResponse(
+            response=result["response"],
+            thread_id=result["thread_id"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing finance chat request: {str(e)}"
+        )
+
+@app.get("/chat/finance/summary", response_model=ChatResponse)
+async def finance_initial_summary():
+    """
+    Get initial finance summary for the finance landing page
+    """
+    try:
+        result = await finance_agent.get_initial_summary()
+        
+        return ChatResponse(
+            response=result["response"],
+            thread_id=result["thread_id"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating finance summary: {str(e)}"
+        )
+
 @app.post("/search")
 async def direct_search(query: str, num_results: int = 5):
     """
@@ -115,6 +198,47 @@ async def get_agent_info():
         raise HTTPException(
             status_code=500,
             detail=f"Error getting agent info: {str(e)}"
+        )
+
+@app.get("/agents/info")
+async def get_all_agents_info():
+    """Get information about all available agents"""
+    try:
+        general_agent = perplexity_agent.create_agent()
+        sports_agent_info = sports_agent.create_agent()
+        finance_agent_info = finance_agent.create_agent()
+        
+        return {
+            "agents": [
+                {
+                    "type": "general",
+                    "name": general_agent.name,
+                    "model": general_agent.model,
+                    "endpoint": "/chat",
+                    "tools": [tool.__name__ for tool in general_agent.tools] if general_agent.tools else []
+                },
+                {
+                    "type": "sports",
+                    "name": sports_agent_info.name,
+                    "model": sports_agent_info.model,
+                    "endpoint": "/chat/sports",
+                    "summary_endpoint": "/chat/sports/summary",
+                    "tools": [tool.__name__ for tool in sports_agent_info.tools] if sports_agent_info.tools else []
+                },
+                {
+                    "type": "finance",
+                    "name": finance_agent_info.name,
+                    "model": finance_agent_info.model,
+                    "endpoint": "/chat/finance",
+                    "summary_endpoint": "/chat/finance/summary",
+                    "tools": [tool.__name__ for tool in finance_agent_info.tools] if finance_agent_info.tools else []
+                }
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error getting agents info: {str(e)}"
         )
 
 def main():
