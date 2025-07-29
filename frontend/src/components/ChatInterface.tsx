@@ -35,10 +35,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     const storedThreadId = ConversationStorage.loadThreadId(agentType);
     
-    if (storedThreadId) {
-      setThreadId(storedThreadId);
-    } else if (initialResponse) {
-      // Use initial response if no stored thread ID
+    // Always show initial response if available, regardless of stored thread ID
+    if (initialResponse) {
       const initialMessage: ChatMessage = {
         id: Date.now().toString(),
         type: 'assistant',
@@ -49,6 +47,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setMessages([initialMessage]);
       setThreadId(initialResponse.thread_id);
       ConversationStorage.saveThreadId(agentType, initialResponse.thread_id);
+    } else if (storedThreadId) {
+      // Only use stored thread ID if no initial response
+      setThreadId(storedThreadId);
     }
   }, [initialResponse, agentType]);
 
