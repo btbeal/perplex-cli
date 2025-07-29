@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from agent import perplexity_agent
 from specialized_agents import sports_agent, finance_agent
 from models import ChatRequest, ChatResponse, HealthResponse
+from conversation_storage import conversation_manager
 
 load_dotenv()
 
@@ -53,6 +54,7 @@ async def root():
         status="healthy",
         message="Perplexity AI Clone is running"
     )
+
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -166,6 +168,21 @@ async def finance_initial_summary():
         raise HTTPException(
             status_code=500,
             detail=f"Error generating finance summary: {str(e)}"
+        )
+
+@app.delete("/conversations/{thread_id}")
+async def clear_conversation(thread_id: str):
+    """
+    Clear conversation history for a specific thread
+    """
+    try:
+        await conversation_manager.clear_session(thread_id)
+        return {"message": f"Conversation {thread_id} cleared successfully"}
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error clearing conversation: {str(e)}"
         )
 
 @app.post("/search")

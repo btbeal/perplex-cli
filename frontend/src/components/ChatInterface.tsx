@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { AgentType, ChatResponse } from '../types/api';
 import ResponseDisplay from './ResponseDisplay';
+import { ConversationStorage } from '../services/conversationStorage';
 import './ChatInterface.css';
 
 interface ChatInterfaceProps {
@@ -30,9 +31,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Add initial response if provided
+  // Load thread ID from storage on mount
   useEffect(() => {
-    if (initialResponse) {
+    const storedThreadId = ConversationStorage.loadThreadId(agentType);
+    
+    if (storedThreadId) {
+      setThreadId(storedThreadId);
+    } else if (initialResponse) {
+      // Use initial response if no stored thread ID
       const initialMessage: ChatMessage = {
         id: Date.now().toString(),
         type: 'assistant',
@@ -42,9 +48,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
       setMessages([initialMessage]);
       setThreadId(initialResponse.thread_id);
-    } else {
-      setMessages([]);
-      setThreadId(undefined);
+      ConversationStorage.saveThreadId(agentType, initialResponse.thread_id);
     }
   }, [initialResponse, agentType]);
 
@@ -88,7 +92,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Update thread ID and save to storage
       setThreadId(response.thread_id);
+      ConversationStorage.saveThreadId(agentType, response.thread_id);
+      
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatMessage = {
@@ -110,10 +118,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
+  const clearConversation = async () => {
+    if (threadId) {
+      await ConversationStorage.clearConversation(agentType, threadId);
+    }
+    
+    setMessages([]);
+    setThreadId(undefined);
+    
+    // If there was an initial response, create a new conversation with it
+    if (initialResponse) {
+      const initialMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: 'assistant',
+        content: initialResponse.response.summary,
+        response: initialResponse,
+        timestamp: new Date(),
+      };
+      setMessages([initialMessage]);
+      setThreadId(initialResponse.thread_id);
+      ConversationStorage.saveThreadId(agentType, initialResponse.thread_id);
+    }
+  };
+
   return (
     <div className="chat-interface">
       <div className="welcome-message">
         <h1>{welcomeMessage}</h1>
+        {threadId && messages.length > 0 && (
+          <button 
+            onClick={clearConversation}
+            className="clear-conversation-btn"
+            title="Clear conversation history"
+          >
+            🗑️ Clear Chat
+          </button>
+        )}
       </div>
 
       <div className="messages-container">
