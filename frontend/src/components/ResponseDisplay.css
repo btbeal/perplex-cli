@@ -1,0 +1,142 @@
+.response-display {
+  color: #e0e0e0;
+}
+
+.summary-section {
+  margin-bottom: 24px;
+}
+
+.summary-content {
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.summary-content p {
+  margin: 0 0 16px 0;
+}
+
+.summary-content p:last-child {
+  margin-bottom: 0;
+}
+
+.explore-more-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.explore-more-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explore-more-title::before {
+  content: '🔗';
+  font-size: 1rem;
+}
+
+.sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.source-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+  group: true;
+}
+
+.source-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(79, 70, 229, 0.5);
+  transform: translateX(4px);
+}
+
+.source-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.source-title {
+  color: #ffffff;
+  font-weight: 500;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.source-url {
+  color: #b0b0b0;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-arrow {
+  color: #888888;
+  font-size: 1.2rem;
+  margin-left: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.source-link:hover .source-arrow {
+  color: #4f46e5;
+  transform: translate(2px, -2px);
+}
+
+.show-more-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.show-more-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(79, 70, 229, 0.5);
+  color: #ffffff;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .source-link {
+    padding: 10px 12px;
+  }
+
+  .source-title {
+    font-size: 0.9rem;
+  }
+
+  .source-url {
+    font-size: 0.8rem;
+  }
+
+  .summary-content {
+    font-size: 0.95rem;
+  }
+} 
